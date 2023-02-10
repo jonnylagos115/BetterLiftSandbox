@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">BetterLiftSandbox</string>
+    <string name="menu_profile">Profile</string>
+    <string name="menu_workout">Workout</string>
+    <string name="menu_exercises">Exercises</string>
+    <string name="submit">Submit</string>
+    <string name="new_exercise_text">New Exercise</string>
+    <string name="save_button">Save</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="add_name">Add Name</string>
+    <string name="add_exercise">Add Exercise</string>
+    <string name="add_set">Add Set</string>
+    <string name="action_switch_layout">Switch Layout</string>
+    <string name="finish_button">Finish</string>
+    <string name="select_muscle_type">Select muscle type</string>
+    <string name="instructions_label">Instructions: </string>
+    <string name="create_exercise">Create Exercise</string>
+    <string name="create_workout">Create Workout</string>
+
+    <string name="delete_all_exercises">Delete All Exercises</string>
+    <string name="workout_note">Workout note</string>
+    <string name="enter_workout_template_title">Enter title</string>
+    <string name="set_header">Set</string>
+    <string name="previous_header">Previous</string>
+    <string name="pounds_header">LBS</string>
+    <string name="reps_header">Reps</string>
+
+    <string name="workout_item_action_edit">Edit</string>
+    <string name="workout_item_action_rename">Rename</string>
+    <string name="workout_item_action_duplicate">Duplicate</string>
+    <string name="workout_item_action_delete">Delete</string>
+    <string name="new_workout_template_title">New workout template</string>
+
+    <string name="exercise_detail_fragment_label">{exerciseName}</string>
+    <string-array name="muscle_groups">
+        <item>Arms</item>
+        <item>Back</item>
+        <item>Core</item>
+        <item>Chest</item>
+        <item>Legs</item>
+        <item>Shoulders</item>
+        <item>Cardio</item>
+        <item>Other</item>
+    </string-array>
+</resources>

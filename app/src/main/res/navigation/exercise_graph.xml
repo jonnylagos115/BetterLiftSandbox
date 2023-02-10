@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/exercise"
+    app:startDestination="@id/nav_exercise">
+
+    <fragment
+        android:id="@+id/nav_exercise"
+        android:name="com.example.betterliftsandbox.ui.exercise.ExerciseFragment"
+        android:label="@string/menu_exercises"
+        tools:layout="@layout/fragment_exercise" >
+        <action
+            android:id="@+id/action_nav_exercise_to_nav_exercise_detail"
+            app:destination="@id/nav_exercise_detail" />
+        <action
+            android:id="@+id/action_nav_exercise_to_exerciseNewItemFragment"
+            app:destination="@id/exerciseNewItemFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_exercise_detail"
+        android:name="com.example.betterliftsandbox.ui.exercise.ExerciseDetailFragment"
+        android:label="@string/exercise_detail_fragment_label" >
+        <argument
+            android:name="exerciseId"
+            app:argType="integer" />
+        <argument
+            android:name="exerciseName"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/exerciseNewItemFragment"
+        android:name="com.example.betterliftsandbox.ui.exercise.ExerciseNewItemFragment"
+        android:label="ExerciseNewItemFragment" >
+        <action
+            android:id="@+id/action_exerciseNewItemFragment_to_nav_exercise"
+            app:destination="@id/nav_exercise"
+            app:popUpTo="@id/nav_exercise"
+            app:popUpToInclusive="true" />
+    </fragment>
+</navigation>
