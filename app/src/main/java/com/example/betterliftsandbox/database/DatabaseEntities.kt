@@ -2,7 +2,6 @@ package com.example.betterliftsandbox.database
 
 import androidx.room.*
 import com.example.betterliftsandbox.domain.Exercise
-import com.example.betterliftsandbox.network.NetworkExerciseImage
 import com.google.gson.Gson
 
 

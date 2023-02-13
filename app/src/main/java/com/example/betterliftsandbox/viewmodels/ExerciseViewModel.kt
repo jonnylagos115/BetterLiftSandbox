@@ -18,14 +18,15 @@ class ExerciseViewModel internal constructor(
     private val exerciseRepo: ExerciseRepo
 ) : ViewModel() {
 
-   /* private val _uiState = MutableStateFlow(ExercisesUiState())
-    val uiState: StateFlow<ExercisesUiState> = _uiState.asStateFlow()*/
+    private val _uiState = MutableStateFlow(ExercisesUiState())
+    val uiState: StateFlow<ExercisesUiState> = _uiState.asStateFlow()
 
-    val exerciseItems: StateFlow<List<Exercise>> = exerciseRepo.exerciseStream.stateIn(
+    private val exerciseItems: StateFlow<List<Exercise>> = exerciseRepo.exerciseStream.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(),
             initialValue = listOf()
         )
+
 
     //(TODO: Figure out how to set up the Exercise here for the recyclerview adapter to use
     // The fields of ExercisesUiState contains a list of Exercise, the idea is that when UI collects
@@ -41,11 +42,26 @@ class ExerciseViewModel internal constructor(
         .flow
         .cachedIn(viewModelScope)*/
 
-    init {
-        refreshDataFromRepository()
+    /**
+     * Navigation for the ExerciseDetail fragment
+     */
+
+    fun onExerciseItemClicked(id: Int, label: String) {
+        _uiState.update {
+            it.copy(navigateToExerciseDetail = id, exerciseDetailLabel = label)
+        }
     }
 
+    fun onExerciseDetailNavigated() {
+        _uiState.update {
+            it.copy(navigateToExerciseDetail = null, exerciseDetailLabel = null)
+        }
+    }
 
+    init {
+        refreshDataFromRepository()
+        loadExerciseListData()
+    }
 
     private fun refreshDataFromRepository() {
         viewModelScope.launch {
@@ -55,6 +71,27 @@ class ExerciseViewModel internal constructor(
                     Log.d(TAG, "Network get request made")
                 } catch (networkError: IOException) {
                     Log.d(TAG, "Network get request failed")
+                }
+            }
+        }
+    }
+
+    private fun loadExerciseListData() {
+        viewModelScope.launch {
+            exerciseItems.collect { exercises ->
+                _uiState.update {
+                    it.copy(exercisesItems = exercises.map { currentItem ->
+                        ExerciseItemUiState(
+                            exerciseId = currentItem.exerciseId,
+                            exerciseName = currentItem.exerciseName,
+                            muscleGroupName = currentItem.muscleGroupName,
+                            description = currentItem.description,
+                            imageResUrl = currentItem.imageResUrl,
+                            deleteExerciseItem = {
+                                deleteExerciseItem(currentItem)
+                            }
+                        )
+                    })
                 }
             }
         }
@@ -89,7 +126,7 @@ class ExerciseViewModel internal constructor(
         )
     }
 
-    fun deleteExerciseItem(exerciseItem: Exercise) {
+    private fun deleteExerciseItem(exerciseItem: Exercise) {
         viewModelScope.launch {
             exerciseRepo.deleteExerciseItem(exerciseItem)
         }
@@ -155,15 +192,18 @@ class ExerciseViewModel internal constructor(
     }
 }
 
-/*data class ExercisesUiState(
-    //val exercisesItems: List<ExerciseItemUiState> = listOf()
+data class ExercisesUiState(
+    val navigateToExerciseDetail: Int? = null,
+    val exerciseDetailLabel: String? = null,
+    val exercisesItems: List<ExerciseItemUiState> = listOf()
 )
 
 data class ExerciseItemUiState(
-    val id: Long,
-    val name: String,
+    val exerciseId: Int,
+    val exerciseName: String,
     val muscleGroupName: String,
-    @DrawableRes val imageResId: Int,
-    val onClickDetailedExerciseAction: () -> Unit
-)*/
+    val description: String,
+    val imageResUrl: String?,
+    val deleteExerciseItem: () -> Unit
+)
 

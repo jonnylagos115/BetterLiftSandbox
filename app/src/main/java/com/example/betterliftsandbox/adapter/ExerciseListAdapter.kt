@@ -6,34 +6,44 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.betterliftsandbox.R
 import com.example.betterliftsandbox.databinding.FragmentExercisesListItemBinding
-import com.example.betterliftsandbox.domain.Exercise
+import com.example.betterliftsandbox.viewmodels.ExerciseItemUiState
 
 
-class ExerciseListAdapter(private val clickEvent: (ClickEvent, Exercise) -> Unit) :
-    ListAdapter<Exercise, ExerciseListAdapter.ExerciseViewHolder>(DiffCallback)
+class ExerciseListAdapter(val clickListener: ExerciseListListener) :
+    ListAdapter<ExerciseItemUiState, ExerciseListAdapter.ExerciseViewHolder>(ExerciseListDiffCallback())
 {
     private var item_selected_position = -1
     private val TAG = "ExercisesFragAdapter"
-    private var selectedListItems = mutableListOf<Exercise>()
+    private var selectedListItems = mutableListOf<ExerciseItemUiState>()
     enum class ClickEvent {
         DELETE,
         VIEW
     }
 
-    inner class ExerciseViewHolder(private val binding: FragmentExercisesListItemBinding) :
+    override fun onBindViewHolder(holder: ExerciseViewHolder, position: Int) {
+        val current = getItem(position)
+        holder.bind(current, clickListener)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExerciseViewHolder {
+        Log.d(TAG, "ViewHolder created")
+        return ExerciseViewHolder.from(parent)
+    }
+
+    class ExerciseViewHolder private constructor(private val binding: FragmentExercisesListItemBinding) :
         RecyclerView.ViewHolder(binding.root){
 
-        init {
-            binding.deleteItemButton.setOnClickListener {
-                clickEvent(ClickEvent.DELETE, getItem(bindingAdapterPosition))
-            }
-        }
-        fun bind(exercise: Exercise) {
+        fun bind(item: ExerciseItemUiState, clickListener: ExerciseListListener) {
             binding.apply {
-                exerciseNameTextView.text = exercise.exerciseName
-                muscleGroupNameTextView.text = exercise.muscleGroupName
+                exerciseNameTextView.text = item.exerciseName
+                muscleGroupNameTextView.text = item.muscleGroupName
+                deleteItemButton.setOnClickListener {
+                    item.deleteExerciseItem.invoke()
+                }
+                itemView.setOnClickListener {
+                    clickListener.onClick(item)
+                }
                 /*if (exercise.isSelected == true) {
                     exerciseImageView.setImageResource(R.drawable.icons8_done_50)
                     exercise.isSelected = false
@@ -42,22 +52,14 @@ class ExerciseListAdapter(private val clickEvent: (ClickEvent, Exercise) -> Unit
                 }*/
             }
         }
-    }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExerciseViewHolder {
-        val layoutInflater = LayoutInflater.from(parent.context)
-        val binding = FragmentExercisesListItemBinding.inflate(layoutInflater, parent, false)
-        Log.d(TAG, "New viewholder created")
-        return ExerciseViewHolder(binding)
-    }
-
-    override fun onBindViewHolder(holder: ExerciseViewHolder, position: Int) {
-        val current = getItem(position)
-
-        holder.itemView.setOnClickListener {
-            clickEvent(ClickEvent.VIEW, current)
+        companion object {
+            fun from(parent: ViewGroup): ExerciseViewHolder {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val binding = FragmentExercisesListItemBinding.inflate(layoutInflater, parent, false)
+                return ExerciseViewHolder(binding)
+            }
         }
-        holder.bind(current)
     }
 
     private fun setSelection(adapterPosition: Int) {
@@ -67,22 +69,18 @@ class ExerciseListAdapter(private val clickEvent: (ClickEvent, Exercise) -> Unit
         notifyItemChanged(adapterPosition)
     }
 
-    fun getSelectedItems(): MutableList<Exercise> {
-        for (exercise in selectedListItems){
-            exercise.isSelected = false
-        }
-        return selectedListItems
+}
+
+class ExerciseListDiffCallback : DiffUtil.ItemCallback<ExerciseItemUiState>() {
+    override fun areItemsTheSame(oldItem:ExerciseItemUiState, newItem: ExerciseItemUiState): Boolean {
+        return oldItem === newItem
     }
 
-    companion object {
-        private val DiffCallback = object : DiffUtil.ItemCallback<Exercise>() {
-            override fun areItemsTheSame(oldItem:Exercise, newItem: Exercise): Boolean {
-                return oldItem === newItem
-            }
-
-            override fun areContentsTheSame(oldItem: Exercise, newItem: Exercise): Boolean {
-                return oldItem.exerciseId == newItem.exerciseId
-            }
-        }
+    override fun areContentsTheSame(oldItem: ExerciseItemUiState, newItem: ExerciseItemUiState): Boolean {
+        return oldItem.exerciseId == newItem.exerciseId
     }
+}
+
+class ExerciseListListener(val clickListener: (exerciseId: Int, exerciseName: String) -> Unit) {
+    fun onClick(exercise: ExerciseItemUiState) = clickListener(exercise.exerciseId, exercise.exerciseName)
 }

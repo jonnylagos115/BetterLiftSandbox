@@ -1,9 +1,7 @@
 package com.example.betterliftsandbox.repository
 
-import android.net.Network
 import com.example.betterliftsandbox.database.*
 import com.example.betterliftsandbox.domain.Exercise
-import com.example.betterliftsandbox.network.NetworkExerciseImage
 import com.example.betterliftsandbox.network.NetworkService
 import com.example.betterliftsandbox.network.asDatabaseModel
 import kotlinx.coroutines.CoroutineDispatcher

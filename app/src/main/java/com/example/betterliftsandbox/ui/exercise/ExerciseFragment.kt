@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.betterliftsandbox.R
 import com.example.betterliftsandbox.adapter.ExerciseListAdapter
+import com.example.betterliftsandbox.adapter.ExerciseListListener
 import com.example.betterliftsandbox.databinding.FragmentExerciseBinding
 import com.example.betterliftsandbox.viewmodels.ExerciseViewModel
 import com.example.betterliftsandbox.utils.exerciseVMInjector
@@ -39,12 +40,9 @@ class ExerciseFragment : Fragment() {
     ): View {
         // Retrieve and inflate the layout for this fragment
         _binding = FragmentExerciseBinding.inflate(inflater, container, false)
-        val adapter = ExerciseListAdapter { event, exerciseItem ->
-            when(event) {
-                ExerciseListAdapter.ClickEvent.VIEW -> findNavController().navigate(ExerciseFragmentDirections.actionNavExerciseToNavExerciseDetail(exerciseItem.exerciseId, exerciseItem.exerciseName))
-                ExerciseListAdapter.ClickEvent.DELETE -> viewModel.deleteExerciseItem(exerciseItem)
-            }
-        }
+        val adapter = ExerciseListAdapter(ExerciseListListener { exerciseItemId, exerciseName ->
+            viewModel.onExerciseItemClicked(exerciseItemId, exerciseName)
+        })
         binding.exercisesList.adapter = adapter
         subscribeUi(adapter)
 
@@ -54,8 +52,16 @@ class ExerciseFragment : Fragment() {
     private fun subscribeUi(adapter: ExerciseListAdapter) {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.exerciseItems.collect{
-                    adapter.submitList(it)
+                viewModel.uiState.collect { currentState ->
+                    adapter.submitList(currentState.exercisesItems)
+                    if (currentState.navigateToExerciseDetail != null){
+                        val action = ExerciseFragmentDirections.actionNavExerciseToNavExerciseDetail(
+                            currentState.navigateToExerciseDetail,
+                            currentState.exerciseDetailLabel
+                        )
+                        findNavController().navigate(action)
+                        viewModel.onExerciseDetailNavigated()
+                    }
                 }
             }
         }
